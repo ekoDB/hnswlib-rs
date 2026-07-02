@@ -67,7 +67,7 @@ num-traits = { version = "0.2" }
 
 
 #  for hashing . hashbrown still needed beccause of get_key_value(&key)
-hashbrown = { version = "0.15" }
+hashbrown = { version = "0.17" }
 indexmap = { version = ">= 2.11" }
 
 rand = { version = "0.9" }
@@ -88,7 +88,7 @@ anndists = { git = "https://github.com/ekoDB/anndists", branch = "master" }
 [dev-dependencies]
 # hdf5 = { version = "0.8" }
 # metno is needed as hdf5 is blocked to hdfsys 1.12
-hdf5 = {package = "hdf5-metno", version = "0.12" }
+hdf5 = {package = "hdf5-metno", version = "0.13" }
 
 ndarray = { version = ">=0.16.0, <0.18" }
 skiplist = { version = "0.6" }
