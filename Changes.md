@@ -1,5 +1,12 @@
 # Changes
 
+- version 0.4.0 (unreleased, ekoDB fork)
+  soft-deletion with neighbor repair (mark_deleted scans all layers) and search-layer optimizations.
+  smart bulk insert methods (bulk_insert_slice and friends) for efficient data insertion.
+  SIMD (simdeez_f) enabled by default; anndists now consumed from the ekoDB fork.
+  removed bincode dependency (RUSTSEC-2025-0141); dependency cleanup.
+  added GitHub Actions CI (rustfmt, clippy -D warnings, tests); fixed all outstanding clippy and rustfmt findings.
+
 - version 0.3.4
   small fix in reloading with DataMap in case dump directory given by a relative path (thanks to dsgallups)  
   update deps.

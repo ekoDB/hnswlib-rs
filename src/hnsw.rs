@@ -1335,12 +1335,18 @@ impl<'b, T: Clone + Send + Sync, D: Distance<T> + Send + Sync> Hnsw<'b, T, D> {
     pub fn bulk_insert_slice(&self, datas: &[(&[T], usize)]) {
         const PARALLEL_THRESHOLD: usize = 128;
         if datas.len() < PARALLEL_THRESHOLD {
-            debug!("bulk_insert_slice: sequential mode for {} vectors", datas.len());
+            debug!(
+                "bulk_insert_slice: sequential mode for {} vectors",
+                datas.len()
+            );
             for &item in datas {
                 self.insert_slice(item);
             }
         } else {
-            debug!("bulk_insert_slice: parallel mode for {} vectors", datas.len());
+            debug!(
+                "bulk_insert_slice: parallel mode for {} vectors",
+                datas.len()
+            );
             datas.par_iter().for_each(|&item| self.insert_slice(item));
         }
     } // end of bulk_insert_slice
@@ -1984,7 +1990,6 @@ where
 } // end of check_reload
 
 #[cfg(test)]
-
 mod tests {
 
     use super::*;

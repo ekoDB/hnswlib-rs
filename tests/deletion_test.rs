@@ -33,17 +33,26 @@ fn test_basic_deletion() {
     // Search before deletion — origin_id 0 should be findable
     let results_before = hnsw.search(&data[0], 10, 30);
     let found_before = results_before.iter().any(|r| r.d_id == 0);
-    assert!(found_before, "Point 0 should be in search results before deletion");
+    assert!(
+        found_before,
+        "Point 0 should be in search results before deletion"
+    );
 
     // Delete point with origin_id 0
     let deleted = hnsw.mark_deleted(0);
-    assert!(deleted, "mark_deleted should return true for existing point");
+    assert!(
+        deleted,
+        "mark_deleted should return true for existing point"
+    );
     assert_eq!(hnsw.get_deleted_count(), 1, "Deleted count should be 1");
 
     // Search after deletion — origin_id 0 should NOT be in results
     let results_after = hnsw.search(&data[0], 10, 30);
     let found_after = results_after.iter().any(|r| r.d_id == 0);
-    assert!(!found_after, "Deleted point should NOT appear in search results");
+    assert!(
+        !found_after,
+        "Deleted point should NOT appear in search results"
+    );
 }
 
 #[test]
@@ -70,8 +79,15 @@ fn test_double_deletion() {
 
     // Delete same point twice
     assert!(hnsw.mark_deleted(0));
-    assert!(hnsw.mark_deleted(0), "Double delete should return true (already deleted)");
-    assert_eq!(hnsw.get_deleted_count(), 1, "Count should still be 1 after double delete");
+    assert!(
+        hnsw.mark_deleted(0),
+        "Double delete should return true (already deleted)"
+    );
+    assert_eq!(
+        hnsw.get_deleted_count(),
+        1,
+        "Count should still be 1 after double delete"
+    );
 }
 
 #[test]
@@ -124,7 +140,10 @@ fn test_delete_all_points() {
 
     // Search should return empty
     let results = hnsw.search(&data[0], 10, 30);
-    assert!(results.is_empty(), "Search should return empty when all points deleted");
+    assert!(
+        results.is_empty(),
+        "Search should return empty when all points deleted"
+    );
 }
 
 #[test]
@@ -145,7 +164,10 @@ fn test_higher_layer_deletion() {
     // Check that we have multiple layers
     let max_layer = hnsw.get_max_level_observed();
     println!("Max layer observed: {}", max_layer);
-    assert!(max_layer > 0, "With 1000 points, we should have multiple layers");
+    assert!(
+        max_layer > 0,
+        "With 1000 points, we should have multiple layers"
+    );
 
     // Delete all points and verify all are found
     let mut deleted_count = 0;
@@ -210,7 +232,10 @@ fn test_search_quality_after_deletion() {
     // Search for a cluster B point — should still work well
     let query_b = vec![10.0, 10.0, 10.0, 10.0];
     let results_b = hnsw.search(&query_b, 10, 30);
-    assert!(!results_b.is_empty(), "Cluster B search should return results");
+    assert!(
+        !results_b.is_empty(),
+        "Cluster B search should return results"
+    );
     for r in &results_b {
         assert!(r.d_id >= 100, "Cluster B results should be from cluster B");
     }
@@ -221,8 +246,7 @@ fn test_deletion_with_cosine_distance() {
     // Verify deletion works with different distance metrics
     let dim = 8;
     let nb_elem = 50;
-    let hnsw =
-        Hnsw::<f32, DistCosine>::new(16, nb_elem, 16, 200, DistCosine);
+    let hnsw = Hnsw::<f32, DistCosine>::new(16, nb_elem, 16, 200, DistCosine);
     let data = gen_random_vectors(dim, nb_elem);
 
     for (i, v) in data.iter().enumerate() {
@@ -273,7 +297,10 @@ fn test_deletion_with_parallel_insert() {
 #[test]
 fn test_empty_graph_deletion() {
     let hnsw = Hnsw::<f32, DistL2>::new(16, 100, 16, 200, DistL2);
-    assert!(!hnsw.mark_deleted(0), "Deleting from empty graph should return false");
+    assert!(
+        !hnsw.mark_deleted(0),
+        "Deleting from empty graph should return false"
+    );
     assert_eq!(hnsw.get_deleted_count(), 0);
 }
 
@@ -293,5 +320,8 @@ fn test_single_point_deletion() {
 
     // Search returns empty
     let results = hnsw.search(&v, 1, 10);
-    assert!(results.is_empty(), "Search should return empty after deleting the only point");
+    assert!(
+        results.is_empty(),
+        "Search should return empty after deleting the only point"
+    );
 }

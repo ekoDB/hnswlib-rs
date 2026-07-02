@@ -1394,7 +1394,6 @@ impl<T: Serialize + DeserializeOwned + Clone + Sized + Send + Sync, D: Distance<
 //===============================================================================================================
 
 #[cfg(test)]
-
 mod tests {
     use super::*;
 
