@@ -155,7 +155,7 @@ Some lines extracted from this Mnist benchmark show how it works for f32 and L2 
 [Sannsyn](https://sannsyn.com/en/) contributed to Drop implementation and FilterT trait.
 Petter Egesund added the DistLevenshtein distance.
 
-## Evolutions are described [here](./Changes.md)
+## Evolutions are described in the [changelog](./CHANGELOG.md)
 
 ## License
 

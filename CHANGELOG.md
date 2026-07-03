@@ -1,14 +1,37 @@
-# Changes
+# Changelog
 
-- version 0.4.0 (unreleased, ekoDB fork)
-  soft-deletion with neighbor repair (mark_deleted scans all layers) and search-layer optimizations.
-  smart bulk insert methods (bulk_insert_slice and friends) for efficient data insertion.
-  SIMD (simdeez_f) enabled by default; anndists now consumed from the ekoDB fork.
-  removed bincode dependency (RUSTSEC-2025-0141); dependency cleanup.
-  added GitHub Actions CI (rustfmt, clippy -D warnings, tests); fixed all outstanding clippy and rustfmt findings.
+All notable changes to this project are documented in this file.
+
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Releases are tagged `vX.Y.Z` on master; unreleased work accumulates under `[Unreleased]` and is converted to a dated version block at release. History from before the ekoDB fork is preserved verbatim at the bottom, imported from the upstream project's `Changes.md` (upstream did not record dates).
+
+## [Unreleased]
+
+### Added
+
+- **Soft-deletion with neighbor repair** - `mark_deleted()` scans all layers so deleted points cannot reappear from any level; search-layer optimizations; deletion test suite.
+- **Smart bulk insert methods** - `bulk_insert_slice` and friends for efficient data insertion (sequential below a parallelism threshold, parallel above it).
+- **GitHub Actions CI** - rustfmt check, clippy `-D warnings`, and `cargo test --locked` on push/PR to master, pinned to Rust 1.95.0 on x86_64, with `libhdf5-dev` installed for the hdf5 dev-dependency the examples compile against (#2).
+- **Pull request template** with a reviewer checklist.
+
+### Changed
+
+- **SIMD (`simdeez_f`) enabled by default**; anndists is now consumed from the ekoDB fork.
+- **`Cargo.lock` is now tracked** (required for reproducible `--locked` CI; consumers are unaffected since this crate is consumed as a pinned git dependency) and refreshed to the latest compatible versions.
+- **Dependency bumps**: hashbrown 0.15 to 0.17, hdf5-metno 0.12 to 0.13. skiplist stays at 0.6 because 1.x requires `Ord` on element types while `PointIdWithOrder` orders by an f32 distance (`PartialOrd` only).
+- **Lint cleanups** (behavior-preserving): if-let instead of `is_some()`/`unwrap()` pairs, unit-struct construction without `default()`, `is_multiple_of` for the counter check, ignore the `env_logger::try_init` result in the ann-glove example, rustfmt on `hnsw.rs` and `deletion_test.rs`.
+
+### Removed
+
+- **bincode dependency** (RUSTSEC-2025-0141).
+
+---
+
+## Pre-fork upstream history
+
+Imported verbatim from the upstream `Changes.md`.
 
 - version 0.3.4
-  small fix in reloading with DataMap in case dump directory given by a relative path (thanks to dsgallups)  
+  small fix in reloading with DataMap in case dump directory given by a relative path (thanks to dsgallups)
   update deps.
 
 - version 0.3.3
@@ -21,8 +44,8 @@
 
   Possibility to reduce the number of levels used Hnsw structure with the function hnsw::modify_level_scale.
   This often increases significantly recall while incurring a moderate cpu cost. It is also possible
-  to have same recall with smaller *max_nb_conn* parameters so reducing memory usage.  
-  See README.md at [bigann](https://github.com/jean-pierreBoth/bigann).  
+  to have same recall with smaller *max_nb_conn* parameters so reducing memory usage.
+  See README.md at [bigann](https://github.com/jean-pierreBoth/bigann).
   Modification inspired by the article by [Munyampirwa](https://arxiv.org/abs/2412.01940)
 
   Clippy cleaning and minor arguments change (PathBuf to Path String to &str) in dump/reload
@@ -30,37 +53,37 @@
 
 - **version 0.3.0**:
 
-  The distances implementation is now in a separate crate [anndsits](https://crates.io/crates/anndists). Using hnsw_rs::prelude:::*   should make the change transparent. 
+  The distances implementation is now in a separate crate [anndsits](https://crates.io/crates/anndists). Using hnsw_rs::prelude:::*   should make the change transparent.
 
   The mmap implementation makes it possible to use the [coreset](https://github.com/jean-pierreBoth/coreset) crate to compute coreset and clusters of data stored in hnsw dumps.
 
 - version 0.2.1:
-  
-  when using mmap, the points less frequently used (points in lower layers) are preferentially mmap-ed while upper layers are preferentially 
+
+  when using mmap, the points less frequently used (points in lower layers) are preferentially mmap-ed while upper layers are preferentially
   explcitly read from file.
 
   Hnswio is now Sync.
 
   feature stdsimd, based on std::simd, runs with nightly on Hamming with u32,u64 and DisL1,DistL2, DistDot with f32
-  
+
 - The **version 0.2** introduces:
     1. possibility to use mmap on the data file storing  the vectors represented in the hnsw structure. This is mostly usefule for
     large vectors, where data needs more space than the graph part.
-    As a consequence the format of this file changed. Old format can be read but new dumps will be in the new format.  
+    As a consequence the format of this file changed. Old format can be read but new dumps will be in the new format.
     In case of mmap usage, a dump after inserting new elements must ensure that the old file is not overwritten, so a unique file name is
   generated if necessary. See documentation of module Hnswio
 
     1. the filtering trait
-  
+
 - Upgrade of many dependencies. Change from simple_logger to env_logger. The logger is initialized one for all in file src/lib.rs and cannot be intialized twice. The level of log can be modulated by the RUST_LOG env variable on a module basis or switched off. See the *env_logger* crate doc.
-  
+
 - A rust crate *edlib_rs* provides an interface to the *excellent* edlib C++ library  [(Cf edlib)](https://github.com/Martinsos/edlib) can be found at [edlib_rs](https://github.com/jean-pierreBoth/edlib-rs) or on crate.io. It can be used to define a user adhoc distance on &[u8] with normal, prefix or infix mode (which is useful in genomics alignment).
-  
+
 - The library do not depend anymore on hdf5 and ndarray. They are dev-dependancies needed for examples, this simplify compatibility issues.
 - Added insertion methods for slices for easier use with the ndarray crate.
-  
+
 - simd/avx2 requires now the feature "simdeez_f". So by default the crate can compile on M1 chip and transitions to std::simd.
-  
+
 - Added DistPtr and possiblity to dump/reload with this distance type. (See *load_hnsw_with_dist* function)
-  
+
 - Implementation of Hamming for f64 exclusively in the context SuperMinHash in crate [probminhash](https://crates.io/crates/probminhash)
