@@ -67,7 +67,7 @@ mod utils;
 use utils::*;
 
 pub fn main() {
-    let _ = env_logger::builder().is_test(true).try_init().unwrap();
+    let _ = env_logger::builder().is_test(true).try_init();
     let parallel = true;
     //
     let fname = String::from("/home/jpboth/Data/ANN/glove-25-angular.hdf5");
