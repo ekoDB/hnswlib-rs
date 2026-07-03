@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# Git pre-commit hook for hnsw_rs (ekoDB fork)
+# Runs the same lint and tests as CI before allowing commits.
+#
+# To skip for a quick WIP commit:
+#   git commit --no-verify -m "message"
+#
+
+set -e
+
+echo "🪝 Running pre-commit checks..."
+
+if [ ! -f "Makefile" ]; then
+    echo "❌ Error: must be run from the repository root"
+    exit 1
+fi
+
+echo "🔍 Linting (fmt --check + clippy, matches CI)..."
+make lint
+
+echo "🧪 Testing (matches CI; examples need system HDF5)..."
+make test
+
+echo "✅ Pre-commit checks passed!"
