@@ -1,0 +1,12 @@
+# Pin the Rust toolchain so local builds, contributors, and CI all use the same
+# compiler + clippy lint set. Without this, CI (`dtolnay/rust-toolchain`) pinned
+# 1.95.0 while a local `cargo clippy` ran the developer's default toolchain (e.g.
+# 1.94) — so a clean local clippy could fail CI on a lint that only exists in the
+# newer toolchain. Pinned to 1.95.0 to match this repo's CI and the ekoDB Rust
+# repos (ekodb, ekodb-claw). Bumping is an explicit, reviewable change to this
+# file — run `cargo clippy --all-targets -- -D warnings` after editing to surface
+# any new lints before they hit CI.
+[toolchain]
+channel = "1.95.0"
+components = ["rustfmt", "clippy"]
+profile = "minimal"
