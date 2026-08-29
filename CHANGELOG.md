@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Releases are tagged `vX.Y.Z` on master; unreleased work accumulates under `[Unreleased]` and is converted to a dated version block at release. History from before the ekoDB fork is preserved verbatim at the bottom, imported from the upstream project's `Changes.md` (upstream did not record dates).
 
+## [Unreleased]
+
+### Changed
+
+- **`rust-toolchain.toml` comment no longer names internal repositories.** The comment explaining the pin referred to two internal ekoDB repositories by name in a file that is readable by anyone; it now refers to the other ekoDB Rust repos generically. Comment text only: the pinned toolchain (1.95.0), the `rustfmt` and `clippy` components, and the `minimal` profile are all unchanged.
+
 ## [0.5.0] - 2026-07-02
 
 ### Added
