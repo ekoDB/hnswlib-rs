@@ -6,6 +6,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Rel
 
 ## [Unreleased]
 
+### Added
+
+- **`make bump-version` Makefile target.** Caps a release in one step: collapses `CHANGELOG.md`'s `[Unreleased]` section into a new dated `## [X.Y.Z] - YYYY-MM-DD` heading (refusing when there is nothing to release), bumps `Cargo.toml` by reusing `set-version`, and prints the exact suggested commit subject. Accepts `VERSION=X.Y.Z` or defaults to the next patch version; rejects anything that isn't a plain `X.Y.Z` above the current version (this crate has no pre-release ladder — it's a vendored dependency consumed via a pinned git revision, not published to a registry). Never commits, tags, or pushes.
+
 ### Changed
 
 - **`rust-toolchain.toml` comment no longer names internal repositories.** The comment explaining the pin referred to two internal ekoDB repositories by name in a file that is readable by anyone; it now refers to the other ekoDB Rust repos generically. Comment text only: the pinned toolchain (1.95.0), the `rustfmt` and `clippy` components, and the `minimal` profile are all unchanged.

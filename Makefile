@@ -16,7 +16,7 @@ BANNER := "$(BOLD) ██████═╗ ██╗  ██╗  ████�
 SUBTITLE := \
 	"          🕸️   hnsw_rs  •  Vector Search (ekoDB fork)" "\n"
 
-.PHONY: all setup build build-release test test-x86 check fmt fmt-md lint lint-fix docs clean deps-check deps-update audit install-hooks versions set-version help
+.PHONY: all setup build build-release test test-x86 check fmt fmt-md lint lint-fix docs clean deps-check deps-update audit install-hooks versions set-version bump-version help
 
 all: build
 
@@ -59,6 +59,7 @@ help:
 	@echo "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
 	@echo "  📋 $(GREEN)make versions$(RESET)           - Show crate version"
 	@echo "  🔢 $(GREEN)make set-version VERSION=x.y.z$(RESET) - Set crate version + refresh Cargo.lock"
+	@echo "  🚀 $(GREEN)make bump-version [VERSION=x.y.z]$(RESET) - Cap a release: collapse CHANGELOG.md's [Unreleased], set-version, print the commit subject (default: next patch; never commits)"
 
 # One-time developer setup: everything the other targets rely on. Idempotent.
 setup:
@@ -198,3 +199,56 @@ set-version:
 	@$(CARGO) update -p hnsw_rs --precise $(VERSION) 2>/dev/null || $(CARGO) check --quiet
 	@echo "$(GREEN)Version set:$(RESET)"
 	@grep '^version =' Cargo.toml | head -1
+
+# Usage: make bump-version [VERSION=0.6.0]
+#
+# Caps a release: collapses CHANGELOG.md's [Unreleased] section into a dated
+# version heading, bumps Cargo.toml (reusing set-version) to match, and prints
+# the suggested commit subject. Defaults to the next patch version when
+# VERSION is omitted. Never commits, tags, or pushes — review the diff
+# (git diff) and do that by hand.
+#
+# No pre-release (-rc.N) ladder on purpose: this crate is a vendored
+# dependency consumed by the server via a pinned git revision, never
+# published to a package registry, so there is no "burned version" an
+# in-progress PR could cost by using a plain X.Y.Z early. Every bump is a
+# plain X.Y.Z, same as set-version above already requires.
+bump-version:
+	@cur="$$(grep '^version = "' Cargo.toml | head -1 | cut -d'"' -f2)"; \
+	version="$(VERSION)"; \
+	if [ -z "$$version" ]; then \
+		major="$$(echo "$$cur" | cut -d. -f1)"; \
+		minor="$$(echo "$$cur" | cut -d. -f2)"; \
+		patch="$$(echo "$$cur" | cut -d. -f3)"; \
+		version="$$major.$$minor.$$((patch + 1))"; \
+		echo "$(CYAN)No VERSION given — defaulting to next patch: $$version$(RESET)"; \
+	fi; \
+	if ! echo "$$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$$'; then \
+		echo "$(RED)Error: VERSION must be a plain X.Y.Z — this repo has no pre-release ladder. Got: $$version$(RESET)"; \
+		exit 1; \
+	fi; \
+	top="$$(printf '%s\n%s\n' "$$cur" "$$version" | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)"; \
+	if [ "$$top" != "$$version" ] || [ "$$version" = "$$cur" ]; then \
+		echo "$(RED)Error: $$version is not above the current $$cur.$(RESET)"; \
+		exit 1; \
+	fi; \
+	unrel_line="$$(grep -nE '^## \[Unreleased\]' CHANGELOG.md | head -1 | cut -d: -f1)"; \
+	if [ -z "$$unrel_line" ]; then \
+		echo "$(RED)Error: no '## [Unreleased]' heading in CHANGELOG.md.$(RESET)"; \
+		exit 1; \
+	fi; \
+	entries="$$(awk -v start="$$unrel_line" 'NR > start { if ($$0 ~ /^## \[/) exit; if ($$0 ~ /[^[:space:]]/ && $$0 !~ /^#+[[:space:]]/ && $$0 !~ /^[[:space:]]*<!--.*-->[[:space:]]*$$/) print }' CHANGELOG.md | wc -l | tr -d ' ')"; \
+	if [ "$$entries" -eq 0 ]; then \
+		echo "$(RED)Error: [Unreleased] is empty — nothing to release.$(RESET)"; \
+		exit 1; \
+	fi; \
+	today="$$(date -u +%Y-%m-%d)"; \
+	awk -v ln="$$unrel_line" -v ver="$$version" -v d="$$today" \
+		'NR == ln { print "## [Unreleased]"; print ""; print "## [" ver "] - " d; next } { print }' \
+		CHANGELOG.md > CHANGELOG.md.tmp && mv CHANGELOG.md.tmp CHANGELOG.md; \
+	echo "$(GREEN)CHANGELOG: [Unreleased] -> [$$version] - $$today$(RESET)"; \
+	$(MAKE) set-version VERSION=$$version; \
+	echo ""; \
+	echo "$(YELLOW)Review the diff (git diff), then commit ONLY Cargo.toml, Cargo.lock, and CHANGELOG.md.$(RESET)"; \
+	echo "$(YELLOW)Suggested commit subject:$(RESET)"; \
+	echo "    chore(*): v$$version"
