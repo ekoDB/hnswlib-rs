@@ -1366,9 +1366,13 @@ impl<'b, T: Clone + Send + Sync, D: Distance<T> + Send + Sync> Hnsw<'b, T, D> {
                     let q_point = &q.point_ref;
                     let mut q_point_neighbours = q_point.neighbours.write();
                     let n_to_add = PointWithOrder::<T>::new(&Arc::clone(&new_point), q.dist_to_ref);
-                    // must be sure that we add a point at the correct level. See the comment to search_layer!
-                    // this ensures that reverse updating do not add problems.
-                    let l_n = n_to_add.point_ref.p_id.0 as usize;
+                    // q is a neighbour of new_point in layer l, so the reverse edge goes in q's list for
+                    // that same layer l. Using new_point's own level instead would put it in a list q is
+                    // never searched through at layer l: a level-0 q would never get new_point in its
+                    // layer-0 list, and a layer-0 search pivoting to q could not reach new_point.
+                    // Every point allocates a list for each of the NB_LAYER_MAX layers, so q's list at l
+                    // exists even when q itself lives in a lower layer (see the comment to search_layer).
+                    let l_n = l as usize;
                     let already = q_point_neighbours[l_n]
                         .iter()
                         .position(|old| old.point_ref.p_id == new_point.p_id);

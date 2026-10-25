@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Rel
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-25
+
 ### Added
 
 - **`make bump-version` Makefile target.** Caps a release in one step: collapses `CHANGELOG.md`'s `[Unreleased]` section into a new dated `## [X.Y.Z] - YYYY-MM-DD` heading (refusing when there is nothing to release), bumps `Cargo.toml` by reusing `set-version`, and prints the exact suggested commit subject. Accepts `VERSION=X.Y.Z` or defaults to the next patch version; rejects anything that isn't a plain `X.Y.Z` above the current version (this crate has no pre-release ladder — it's a vendored dependency consumed via a pinned git revision, not published to a registry). Never commits, tags, or pushes.
@@ -13,6 +15,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Rel
 ### Changed
 
 - **`rust-toolchain.toml` comment no longer names internal repositories.** The comment explaining the pin referred to two internal ekoDB repositories by name in a file that is readable by anyone; it now refers to the other ekoDB Rust repos generically. Comment text only: the pinned toolchain (1.95.0), the `rustfmt` and `clippy` components, and the `minimal` profile are all unchanged.
+
+### Fixed
+
+- **Reverse edges are added at the layer being linked, not at the new point's level.** On insert, each neighbour `q` of the new point in layer `l` gets an edge back to the new point; that edge went into `q`'s list for the new point's own level instead of layer `l`. A level-0 neighbour of a point inserted above level 0 therefore never received the edge in its layer-0 list, so a layer-0 search that pivoted to that neighbour could not reach the new point until a later insert happened to link it. This lowered recall for points above level 0, and in small indexes could make such a point unreachable: in about 5% of two-point indexes, searching for two results returned one. The shrink threshold that follows now keys on the layer being linked as well. An index dumped by an earlier version and reloaded keeps the edges it was built with, so it keeps the lower recall until it is rebuilt. Regression test: `tests/reverse_edge_test.rs`.
 
 ## [0.5.0] - 2026-07-02
 
