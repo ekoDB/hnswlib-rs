@@ -1,6 +1,6 @@
 [package]
 name = "hnsw_rs"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["jeanpierre.both@gmail.com", "ekoDB <sean@ekodb.io>"]
 description = "HNSW approximate nearest neighbor search — ekoDB-maintained fork of hnswlib-rs"
 license = "MIT/Apache-2.0"

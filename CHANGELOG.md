@@ -6,6 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Rel
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-25
+
 ### Added
 
 - **`make bump-version` Makefile target.** Caps a release in one step: collapses `CHANGELOG.md`'s `[Unreleased]` section into a new dated `## [X.Y.Z] - YYYY-MM-DD` heading (refusing when there is nothing to release), bumps `Cargo.toml` by reusing `set-version`, and prints the exact suggested commit subject. Accepts `VERSION=X.Y.Z` or defaults to the next patch version; rejects anything that isn't a plain `X.Y.Z` above the current version (this crate has no pre-release ladder — it's a vendored dependency consumed via a pinned git revision, not published to a registry). Never commits, tags, or pushes.
