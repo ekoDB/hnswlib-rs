@@ -14,6 +14,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Rel
 
 - **`rust-toolchain.toml` comment no longer names internal repositories.** The comment explaining the pin referred to two internal ekoDB repositories by name in a file that is readable by anyone; it now refers to the other ekoDB Rust repos generically. Comment text only: the pinned toolchain (1.95.0), the `rustfmt` and `clippy` components, and the `minimal` profile are all unchanged.
 
+### Fixed
+
+- **Reverse edges are added at the layer being linked, not at the new point's level.** On insert, each neighbour `q` of the new point in layer `l` gets an edge back to the new point; that edge went into `q`'s list for the new point's own level instead of layer `l`. A level-0 neighbour of a point inserted above level 0 therefore never received the edge in its layer-0 list, so a layer-0 search that pivoted to that neighbour could not reach the new point until a later insert happened to link it. This lowered recall for points above level 0, and in small indexes could make such a point unreachable: in about 5% of two-point indexes, searching for two results returned one. The shrink threshold that follows now keys on the layer being linked as well. Regression test: `tests/reverse_edge_test.rs`.
+
 ## [0.5.0] - 2026-07-02
 
 ### Added
